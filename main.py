@@ -80,5 +80,5 @@ if user_input or entity_input:
 
 # Footer
 st.markdown("---")
-st.caption("Gegevens uit: nlsfb-ifcapps-extract.xlsx")
+st.caption("Gegevens uit: nlsfb-ifcapps-extract.xlsx met dank aan Root BV")
 
