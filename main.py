@@ -33,7 +33,17 @@ if user_input:
         for idx, row in matches.iterrows():
             st.subheader(f"{row['Class-codenotatie']}")
             st.write(f"{row['tekst_NL-SfB']}")
-            st.write(f"**IFC Entities**: {row['IfcEntities'] if pd.notna(row['IfcEntities']) else 'Geen gegevens beschikbaar'}")
+
+            # Toon IFC Entities als aparte code-elementen
+            if pd.notna(row['IfcEntities']):
+                entiteiten = [e.strip() for e in row['IfcEntities'].split(",") if e.strip()]
+                if entiteiten:
+                    cols = st.columns(len(entiteiten))
+                    for i, entiteit in enumerate(entiteiten):
+                        with cols[i]:
+                            st.code(entiteit, language="")
+            else:
+                st.write("**IFC Entities**: Geen gegevens beschikbaar")
 
             # Suggestieformulier
             with st.expander("💡 Geef een suggestie voor betere IFC Entities"):
