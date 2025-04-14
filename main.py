@@ -15,24 +15,36 @@ def laad_suggesties():
 
 # Laad de Excel-data
 df = pd.read_json("nlsfb-ifcapps-extract.json")
+
 suggesties_df = laad_suggesties()
 
 # Titel
-st.title("NL/SfB naar IFC Entities lookup")
+st.title("Zoek op NL/SfB of IFC Entities")
 
-# Invoerveld voor Class-codenotatie
-user_input = st.text_input("Zoek een NL/SfB code of deel ervan (bijv. '3-', '2.1', 'grond'): ")
+col1, col2 = st.columns(2)
 
-if user_input:
-    # Filter op deels overeenkomende invoer in Class-codenotatie of tekst
-    matches = df[df['Class-codenotatie'].astype(str).str.contains(user_input, case=False, na=False) |
-                 df['tekst_NL-SfB'].astype(str).str.contains(user_input, case=False, na=False)]
+with col1:
+    user_input = st.text_input("Zoek op NL/SfB code of deel ervan (bijv. '3-', '2.1', 'grond'): ")
+
+with col2:
+    entity_input = st.text_input("Zoek op IFC entiteit (bijv. 'IfcWall', 'IfcDoor'): ")
+
+# Combineer beide zoekmogelijkheden
+if user_input or entity_input:
+    matches = df.copy()
+
+    if user_input:
+        matches = matches[matches['Class-codenotatie'].astype(str).str.contains(user_input, case=False, na=False) |
+                          matches['tekst_NL-SfB'].astype(str).str.contains(user_input, case=False, na=False)]
+
+    if entity_input:
+        matches = matches[matches['IfcEntities'].astype(str).str.contains(entity_input, case=False, na=False)]
 
     if not matches.empty:
         st.write(f"**{len(matches)} resultaat(en) gevonden:**")
         for idx, row in matches.iterrows():
-            st.subheader(f"{row['Class-codenotatie']}")
-            st.write(f"{row['tekst_NL-SfB']}")
+            st.subheader(f"Code: {row['Class-codenotatie']}")
+            st.write(f"**Omschrijving**: {row['tekst_NL-SfB']}")
 
             # Toon IFC Entities als aparte code-elementen
             if pd.notna(row['IfcEntities']):
@@ -53,7 +65,6 @@ if user_input:
                     with open(suggesties_path, "a", encoding="utf-8") as f:
                         f.write(f"{timestamp};{row['Class-codenotatie']};{suggestion}\n")
                     st.success("Suggestie verzonden! Bedankt voor je input.")
-                    # Herlaad suggesties zodat ze meteen zichtbaar zijn
                     suggesties_df = laad_suggesties()
 
             # Toon suggesties van andere gebruikers
@@ -65,8 +76,9 @@ if user_input:
 
             st.markdown("---")
     else:
-        st.warning("Geen resultaten gevonden voor deze zoekterm.")
+        st.warning("Geen resultaten gevonden voor deze zoekactie.")
 
 # Footer
 st.markdown("---")
 st.caption("Gegevens uit: nlsfb-ifcapps-extract.xlsx")
+
