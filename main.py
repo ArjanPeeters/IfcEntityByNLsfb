@@ -14,7 +14,7 @@ def laad_suggesties():
         return pd.DataFrame(columns=["timestamp", "Class-codenotatie", "suggestie"])
 
 # Laad de Excel-data
-df = pd.read_excel("nlsfb-ifcapps-extract.xlsx", sheet_name="Sheet 1")
+df = pd.read_json("nlsfb-ifcapps-extract.json")
 suggesties_df = laad_suggesties()
 
 # Titel
